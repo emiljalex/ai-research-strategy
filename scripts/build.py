@@ -12,11 +12,12 @@ from urllib.parse import urlsplit
 from xml.etree import ElementTree as ET
 
 from content import SECTIONS, articles
+from rollout import ROUTE, rehearsal
 from pages import SITE, about, article_page, collection, footer, header, home, lab
 
 ROOT = Path(__file__).resolve().parents[1]
 CANONICAL = "https://airesearchstrategy.com"
-ASSETS = ("site.css", "lab.js", "lab-model.js", "handoff.webp", "mark.png")
+ASSETS = ("site.css", "lab.js", "lab-model.js", "rollout-model.js", "rollout.js", "handoff.webp", "mark.png")
 
 
 @dataclass
@@ -33,12 +34,13 @@ def make_pages(root, review_dir=None):
         entries += articles(review_dir, {"draft"})
     entries.sort(key=lambda item: (-item.order, item.slug))
     pages = [
-        Page("/", SITE, "A research practice founded by Emil Alex investigating judgment, workflows, and intervention in human-AI work.", home(entries, bool(review_dir))),
+        Page("/", SITE, "Emil Alex’s independent practice investigating how organizations can redesign research, product work and decision-making around human and artificial intelligence.", home(entries, bool(review_dir))),
         Page("/lab/", "The Intervention Lab", "Change one label in a synthetic research workflow and trace its effect on a recommendation.", lab()),
+        Page(ROUTE, "The rollout rehearsal", "Inspect how evidence coverage, scope and human authority change a pilot decision.", rehearsal()),
         Page("/about/", "About", "The purpose, founder, and research direction of AI Research Strategy.", about()),
     ]
     pages += [Page(f"/{key}/", title, desc, collection(key, entries)) for key, (title, desc) in SECTIONS.items()]
-    pages += [Page(a.url, a.title, a.description, article_page(a)) for a in entries]
+    pages += [Page(a.url, a.title, a.description, article_page(a, entries)) for a in entries]
     if len({p.path for p in pages}) != len(pages):
         raise ValueError("Two entries have the same route. Give each piece a distinct filename.")
     return pages
@@ -58,6 +60,8 @@ def document(page, review=False, production=False):
     scripts = ""
     if page.path == "/lab/":
         scripts = '<script defer src="/assets/lab-model.js"></script><script defer src="/assets/lab.js"></script>'
+    if page.path in ('/', ROUTE):
+        scripts += '<script defer src="/assets/rollout-model.js"></script><script defer src="/assets/rollout.js"></script>'
     noindex = '' if production and page.path != "/404.html" else '<meta name="robots" content="noindex, nofollow">'
     html = f'''<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
@@ -155,7 +159,9 @@ def build(root=ROOT, review_dir=None, production=False):
         review_dir = review_dir.resolve()
         if production or not review_dir.is_dir() or review_dir.is_relative_to(root):
             raise ValueError("Review requires an existing draft folder outside the repository and a review build.")
-    dest = root.parent / "review-site" if review_dir else root / "dist"
+    dest = review_dir.parent / "review-site" if review_dir else root / "dist"
+    if review_dir and (dest.resolve().is_relative_to(root) or review_dir.is_relative_to(dest.resolve())):
+        raise ValueError("Keep the generated review separate from repository and draft sources.")
     if dest.is_symlink() or (dest.exists() and not (dest / ".airestra-generated").is_file()):
         raise ValueError(f"Refusing to replace an unrecognized output directory: {dest}")
     with tempfile.TemporaryDirectory(dir=dest.parent, prefix=".airestra-build-") as tmp:

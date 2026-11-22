@@ -22,6 +22,7 @@ function openPage() {
     document.title = page.dataset.title;
     currentPath = page.dataset.path;
     mountInterventionLab();
+    mountRollout();
   }
   const target = anchor && document.getElementById(anchor);
   if (target) {
@@ -44,7 +45,8 @@ def pack(drafts, output, source_archive=None):
     build(ROOT, drafts)
     assets = ROOT / "assets"
     artwork = base64.b64encode((assets / "handoff.webp").read_bytes()).decode("ascii")
-    rule = base64.b64encode((assets / "lab-model.js").read_bytes()).decode("ascii")
+    rules = {f"/assets/{name}": base64.b64encode((assets / name).read_bytes()).decode("ascii")
+             for name in ("lab-model.js", "rollout-model.js")}
     icon = base64.b64encode((assets / "mark.png").read_bytes()).decode("ascii")
     private_entries = {entry.url: entry for entry in articles(drafts, {"draft"})}
     source_link = ""
@@ -54,7 +56,7 @@ def pack(drafts, output, source_archive=None):
     templates, print_drafts = [], []
     for page in make_pages(ROOT, drafts):
         if page.path == "/about/" and source_link:
-            page.body = page.body.replace("</div></div></div>", source_link + "</div></div></div>")
+            page.body = page.body.replace('<div class="actions">', source_link + '<div class="actions">', 1)
         body = header(page.path) + f'<main id="main" tabindex="-1">{page.body}</main>' + footer(True)
         if page.path in private_entries:
             entry = private_entries[page.path]
@@ -66,8 +68,8 @@ def pack(drafts, output, source_archive=None):
             print_drafts.append(f'<article class="wrap"><header class="article-head"><h1>{escape(entry.title)}</h1><p>Founder review draft</p></header><div class="prose">{formatted}{download}</div></article>')
         def inner_link(match):
             href = match[1]
-            if href == "/assets/lab-model.js":
-                return f'href="data:text/javascript;base64,{rule}"'
+            if href in rules:
+                return f'href="data:text/javascript;base64,{rules[href]}"'
             if href.startswith("#"):
                 return 'href="#' + page.path + href + '"'
             return f'href="#{href}"' if href.startswith("/") else match[0]
@@ -75,12 +77,12 @@ def pack(drafts, output, source_archive=None):
         body = body.replace('src="/assets/handoff.webp"', f'src="data:image/webp;base64,{artwork}"')
         title = SITE if page.path == "/" else f"{page.title} | {SITE}"
         templates.append(f'<template data-path="{page.path}" data-title="{escape(title, quote=True)}">{body}</template>')
-    scripts = "\n".join((assets / name).read_text(encoding="utf-8") for name in ("lab-model.js", "lab.js"))
+    scripts = "\n".join((assets / name).read_text(encoding="utf-8") for name in ("lab-model.js", "lab.js", "rollout-model.js", "rollout.js"))
     css = (assets / "site.css").read_text(encoding="utf-8")
     html = f'''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex,nofollow"><link rel="icon" href="data:image/png;base64,{icon}"><title>{SITE} | Founder review</title>
 <style>{css}</style></head><body><div class="review-strip">Founder review edition <span>· Drafts are marked in the journal</span></div>
-<div id="publication"><noscript>The three founder drafts follow. Enable JavaScript for the complete site and interactive Lab.{"".join(print_drafts)}</noscript></div>
+<div id="publication"><noscript>The founder drafts follow. Enable JavaScript for the complete site and interactive Lab.{"".join(print_drafts)}</noscript></div>
 {"".join(templates)}<script>{scripts}\n{ROUTER}</script></body></html>'''
     output.write_text(html, encoding="utf-8")
     return output

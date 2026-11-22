@@ -4,6 +4,7 @@ description: A library pickup notice shows how a small interpretive choice can b
 kind: Inquiry
 status: example
 order: 10
+series: Interpretation at work
 ---
 A team can agree on every word in an interview transcript and still disagree about what to build. Imagine a reader who says, “I found the entrance. I still left because I could only come after six.” One person hears a story about finding the building. Another hears a story about opening hours. Those readings would send a library in quite different directions.
 

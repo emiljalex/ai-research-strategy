@@ -71,6 +71,25 @@ class PublishingTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 build(self.root, folder, release)
 
+    def test_review_versions_have_independent_outputs(self):
+        older, _ = build(self.root, self.drafts)
+        original = (older / "index.html").read_bytes()
+        other = self.base / "next" / "drafts"
+        shutil.copytree(self.drafts, other)
+        new, _ = build(self.root, other)
+        self.assertNotEqual(new, older)
+        self.assertEqual((older / "index.html").read_bytes(), original)
+        with self.assertRaises(ValueError):
+            build(self.root, new)
+
+    def test_private_series_is_only_joined_in_review(self):
+        self.draft.write_text(self.draft.read_text().replace("status: draft", "series: Interpretation at work\nstatus: draft"))
+        public, _ = build(self.root)
+        review, _ = build(self.root, self.drafts)
+        path = Path("methods/map-a-handoff/index.html")
+        self.assertNotIn("Private review fixture", (public / path).read_text())
+        self.assertIn("Private review fixture", (review / path).read_text())
+
     def test_broken_fragment_fails(self):
         public, _ = build(self.root)
         home = public / "index.html"

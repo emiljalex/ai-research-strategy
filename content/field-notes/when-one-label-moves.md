@@ -4,6 +4,7 @@ description: A reproducible bench note on a narrow correction that changes a pro
 kind: Bench note
 status: example
 order: 10
+series: Interpretation at work
 ---
 This is a bench note about the [Intervention Lab](/lab/#workbench). The accounts are invented. The labels and decision rule are fixed in the example, so anyone can reproduce the result.
 

@@ -1,10 +1,10 @@
 # AI Research Strategy
 
-An independent research practice founded and led by Emil Alex. This repository contains the public website, a set of inspectable examples, and a deterministic Intervention Lab.
+An independent research practice founded and led by Emil Alex. This repository contains the public website, a set of inspectable examples, and two deterministic, browser-local research experiments.
 
 ## Read and run
 
-[Open the public preview](https://ai-research-strategy-preview.pages.dev/). The intended permanent address is `https://airesearchstrategy.com`.
+[Open the Phase 2 review](https://phase-2.ai-research-strategy-preview.pages.dev/). [Inspect the first release](https://8f877719.ai-research-strategy-preview.pages.dev/). The intended permanent address is `https://airesearchstrategy.com`.
 
 The site builds to ordinary HTML, CSS, images, and JavaScript. Python 3.9 or newer runs the publisher with its standard library. The prebuilt illustration ships with the source. Node 18 or newer runs the Lab tests.
 
@@ -38,7 +38,7 @@ Begin with the decision or observation.
 Describe the evidence and its limits.
 ```
 
-The three public starter pieces use the status `example`. They are a reading prompt, a worksheet, and a bench note about the included fixture. The public build accepts `example` and `published` only. Review adds external files marked `draft` and writes outside the checkout. Only the public `dist/` belongs on Pages.
+The public teaching resources use the status `example`. They are thought experiments, working sheets and reproducible experiment records. Set the optional front matter field `series` to the same name on related pieces to link their public or private editions automatically. The public build accepts `example` and `published` only. Review adds external files marked `draft` and writes outside the checkout. Only the public `dist/` belongs on Pages.
 
 ## Site structure
 
@@ -51,15 +51,15 @@ The three public starter pieces use the status `example`. They are a reading pro
 | `assets/` | Styles, original handoff illustration, icon, Lab fixture and controls |
 | `tests/` | Publishing boundaries and the Lab decision rule |
 
-The offline founder copy includes a Markdown download on each draft. Optionally pass `--source-archive PATH` to `review_copy.py` to include a clean public source ZIP, created with `git archive --format=zip HEAD`, on its About page.
+The review output is generated in the `review-site/` directory next to the selected external draft folder. The offline founder copy includes a Markdown download on each draft. Optionally pass `--source-archive PATH` to `review_copy.py` to include a clean public source ZIP, created with `git archive --format=zip HEAD`, on its About page.
 
-To change the Lab, edit `assets/lab-model.js` and the accompanying bench note together. The optional `scripts/draw_figure.py` regenerates the original illustration and icon with Pillow. The website build uses the committed artwork.
+To change the Lab, edit `assets/lab-model.js` and the accompanying bench note together. The rollout rehearsal uses `scripts/rollout.py` for both views and `assets/rollout-model.js` for its scoped source records, routing and revocable sign-off. Its experiment record is linked from the workbench. The optional `scripts/draw_figure.py` regenerates the original illustration and icon with Pillow. The website build uses the committed artwork.
 
 ## Checks
 
 ```sh
 python3 -m unittest discover -s tests -v
-node --test tests/lab.test.js
+node --test tests/*.test.js
 python3 scripts/build.py
 ```
 

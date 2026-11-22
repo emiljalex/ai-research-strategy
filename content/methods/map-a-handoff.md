@@ -4,6 +4,7 @@ description: A five-part worksheet for recording what crosses a boundary and who
 kind: Worksheet
 status: example
 order: 10
+series: Interpretation at work
 ---
 Choose a decision someone might implement this week. Work backward until you find a moment where one person or tool handed an interpretation to another. Complete the five entries below. A short answer in ordinary language is enough.
 

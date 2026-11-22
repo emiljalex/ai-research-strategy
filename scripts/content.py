@@ -6,7 +6,7 @@ import re
 from urllib.parse import urlsplit
 
 SECTIONS = {
-    "perspectives": ("Perspectives", "Arguments about where judgment lives and how research changes when machines share the work."),
+    "perspectives": ("Perspectives", "Arguments about how organizations learn, choose what to build, and assign responsibility when machines share the work."),
     "methods": ("Methods", "Working frameworks you can take into a real decision, test with a colleague, and revise."),
     "field-notes": ("Field Notes", "Small experiments with visible inputs, reproducible results, and explicit limits.")
 }
@@ -22,6 +22,7 @@ class Article:
     status: str
     order: int
     body: str
+    series: str = ""
 
     @property
     def url(self):
@@ -49,7 +50,7 @@ def articles(folder, allowed_statuses):
                     raise ValueError("Invalid or repeated metadata field")
                 meta[key] = value.strip()
             required = {"title", "description", "kind", "status", "order"}
-            if set(meta) != required or not parts[2].strip():
+            if not required.issubset(meta) or set(meta) - required - {"series"} or not parts[2].strip():
                 raise ValueError("Expected title, description, kind, status, order and a body")
             if meta["status"] not in allowed_statuses:
                 raise ValueError(f"Allowed status in this source directory: {sorted(allowed_statuses)}")
