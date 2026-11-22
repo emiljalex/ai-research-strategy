@@ -1,0 +1,9 @@
+.DS_Store
+__pycache__/
+*.pyc
+/dist/
+/.wrangler/
+/.env
+/.env.*
+/founder-review/
+/review-site/
